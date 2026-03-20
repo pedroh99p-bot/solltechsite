@@ -1,0 +1,1097 @@
+<!DOCTYPE html>
+<html lang="pt-BR" data-theme="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Solltech | Engenharia Solar</title>
+  <meta name="description" content="Reduza até 95% da sua conta de luz com a Solltech. Instalação segura, rápida e com laudo estrutural." />
+
+  <!-- JS: CONFIG CENTRAL + LÓGICA ALPINE -->
+  <script>
+    function solarApp() {
+      return {
+        /* ════════════════════════════════════════
+           ⚙️ CONFIGURAÇÃO DA EMPRESA
+        ════════════════════════════════════════ */
+        CONFIG: {
+          empresa:         'Solltech',
+          cidade:          'Cardoso Moreira e Região',
+          bairros:         'Rio de Janeiro',
+          whatsapp:        '5522981058260',
+          telefone:        '(22) 98105-8260',
+          email:           'contato@solltechsolar.com.br',
+          instagram:       'https://www.instagram.com/solltechsolar/', 
+          waMensagem:      'Olá, Solltech! Vi o site e quero simular minha economia 🌞',
+          vagas:           7,
+          iconUrl:         'https://res.cloudinary.com/dm9mnc97u/image/upload/v1774023354/Untitled_design_5_modfod.svg',
+          logoCompletaUrl: 'https://res.cloudinary.com/dm9mnc97u/image/upload/v1774023424/Untitled_design_6_eyqrgy.svg',
+          
+          /* Paleta de Cores: Azul Base, Laranja Destaque, Amarelo CTA */
+          corPrimaria:     '#0284c7', /* Azul */
+          corEscura:       '#0f172a', /* Azul Escuro (Dark Mode) */
+          corDestaque:     '#f97316', /* Laranja (Detalhes) */
+          corCta:          '#facc15', /* Amarelo (Botões) */
+        },
+
+        /* ── Controle de Tema (Dark/Light) ── */
+        theme: 'dark',
+        menuAberto: false,
+        
+        toggleTheme() {
+          this.theme = this.theme === 'dark' ? 'light' : 'dark';
+          document.documentElement.setAttribute('data-theme', this.theme);
+        },
+        toggleMenu() {
+          this.menuAberto = !this.menuAberto;
+        },
+
+        /* ── Simulador ── */
+        contaLuz: 450,
+        get economiaAnual()     { return Math.round(this.contaLuz * 12 * 0.92); },
+        get economia25anos()    {
+          let total = 0;
+          let economia = this.contaLuz * 0.92;
+          for (let i = 0; i < 25; i++) {
+            total += economia * 12;
+            economia *= 1.09; 
+          }
+          return Math.round(total);
+        },
+        get retornoMeses()      { return Math.round((this.contaLuz * 18) / (this.contaLuz * 0.92)); },
+
+        /* ── Mini Quiz Premium ── */
+        quizPasso: 1,
+        quizRespostas: { valor: '', telhado: '', posse: '', horario: '' },
+        responderQuiz(pergunta, resposta) {
+          this.quizRespostas[pergunta] = resposta;
+          setTimeout(() => {
+            if (this.quizPasso < 5) {
+              this.quizPasso++;
+            }
+          }, 300);
+        },
+
+        /* ── Carrossel (Portfólio + Reviews) ── */
+        projetosEReviews: [
+          { nome: 'Carlos Mendes', bairro: 'Campos dos Goytacazes', kw: '8.4 kWp', img: 'https://images.unsplash.com/photo-1613665813446-82a78c468a1d?w=400&q=80', texto: 'Instalação impecável! Equipe da Solltech muito profissional, obra limpa. Conta caiu para a mínima.' },
+          { nome: 'Ana Paula R.', bairro: 'Italva', kw: '5.2 kWp', img: 'https://images.unsplash.com/photo-1508514177221-188b1cf16e9d?w=400&q=80', texto: 'Processo 100% sem burocracia. A Solltech cuidou de tudo. Em poucos dias tudo funcionando perfeitamente.' },
+          { nome: 'Roberto Fonseca', bairro: 'Cardoso Moreira', kw: '12.0 kWp', img: 'https://images.unsplash.com/photo-1592833159155-c62df1b65634?w=400&q=80', texto: 'Meu telhado era um desafio, mas a engenharia resolveu fácil. Minha conta era R$1.200 e agora pago o mínimo.' },
+          { nome: 'Fernanda Lima', bairro: 'São Fidélis', kw: '6.6 kWp', img: 'https://images.unsplash.com/photo-1611365892117-00ac5ef43c90?w=400&q=80', texto: 'Além da economia, meu imóvel valorizou muito. O sistema é robusto e o acabamento da Solltech é nota 10.' },
+          { nome: 'Marcos Souza', bairro: 'Itaperuna', kw: '9.9 kWp', img: 'https://images.unsplash.com/photo-1588508065123-287b28e013da?w=400&q=80', texto: 'Sem vazamentos, estrutura super robusta. A garantia de 25 anos me dá total tranquilidade no investimento.' }
+        ],
+
+        carouselDragging: false, carouselStart: 0, carouselScroll: 0, hoveringCarousel: false,
+        startDrag(e) {
+          this.carouselDragging = true;
+          const el = this.$refs.carouselTrack;
+          this.carouselStart = (e.pageX || e.touches?.[0]?.pageX) - el.offsetLeft;
+          this.carouselScroll = el.scrollLeft;
+        },
+        moveDrag(e) {
+          if (!this.carouselDragging) return;
+          e.preventDefault();
+          const el = this.$refs.carouselTrack;
+          const x = (e.pageX || e.touches?.[0]?.pageX) - el.offsetLeft;
+          el.scrollLeft = this.carouselScroll - (x - this.carouselStart);
+        },
+        stopDrag() { this.carouselDragging = false; },
+
+        initCarousel() {
+          const el = this.$refs.carouselTrack;
+          if(!el) return;
+          setInterval(() => {
+            if (!this.carouselDragging && !this.hoveringCarousel) {
+              el.scrollLeft += 1.5;
+              if (el.scrollLeft >= el.scrollWidth / 2) el.scrollLeft -= el.scrollWidth / 2;
+            }
+          }, 20); 
+        },
+
+        /* ── FAQ & Utilitários ── */
+        faqAberto: null,
+        toggleFaq(i) { this.faqAberto = this.faqAberto === i ? null : i; },
+        navScrolled: false,
+        preloaderDone: false,
+
+        init() {
+          document.documentElement.style.setProperty('--primary', this.CONFIG.corPrimaria);
+          document.documentElement.style.setProperty('--accent', this.CONFIG.corDestaque);
+          document.documentElement.style.setProperty('--cta', this.CONFIG.corCta);
+          document.documentElement.style.setProperty('--navy', this.CONFIG.corEscura);
+
+          setTimeout(() => {
+            this.preloaderDone = true;
+            document.getElementById('preloader').classList.add('hidden');
+          }, 2400);
+
+          window.addEventListener('scroll', () => { this.navScrolled = window.scrollY > 40; });
+
+          this.$nextTick(() => {
+            this.initReveal();
+            this.initCarousel();
+          });
+        },
+
+        initReveal() {
+          const obs = new IntersectionObserver((entries) => {
+            entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('visible'); });
+          }, { threshold: 0.12 });
+          document.querySelectorAll('.reveal').forEach(el => obs.observe(el));
+        },
+
+        /* ── LÓGICA DE WHATSAPP ── */
+        abrirWhatsApp(origem = 'padrao') {
+          let msg = this.CONFIG.waMensagem;
+
+          if (origem === 'quiz_aprovado') {
+            msg = `*SIMULAÇÃO PREMIUM SOLLTECH* 🚀\n\nOlá, equipe Solltech! Preenchi o diagnóstico rápido no site e meu perfil foi aprovado. Aqui estão meus dados:\n\n💡 *Conta Média:* ${this.quizRespostas.valor}\n🏠 *Tipo de Telhado:* ${this.quizRespostas.telhado}\n🔑 *Posse do Imóvel:* ${this.quizRespostas.posse}\n⏰ *Horário de Consumo:* ${this.quizRespostas.horario}\n\nGostaria de receber meu orçamento gratuito!`;
+          } else if (origem === 'simulador') {
+            msg = `⚡ Olá! Acabei de usar o simulador no site da Solltech e vi que minha economia será excelente (Conta R$ ${this.contaLuz}). Quero dar o próximo passo!`;
+          } else if (origem === 'hero') {
+            msg = `🌞 Olá, Solltech! Vi o site de vocês e quero aproveitar uma das vagas deste mês para simular minha economia.`;
+          } else if (origem === 'cta-band') {
+            msg = `💬 Olá! Estou pronto para zerar minha conta de luz com a tecnologia da Solltech. Como funciona a instalação?`;
+          } else if (origem === 'mapa') {
+            msg = `📐 Olá! Vi no site que a sede de vocês é em Cardoso Moreira. Gostaria de agendar uma visita técnica!`;
+          } else if (origem === 'video_quem_somos') {
+            msg = `🏆 Olá! Assisti ao vídeo no site e gostei muito da estrutura da Solltech. Poderiam me mandar um orçamento sem compromisso?`;
+          }
+
+          const url = `https://wa.me/${this.CONFIG.whatsapp}?text=${encodeURIComponent(msg)}&utm_source=landing&utm_campaign=${origem}`;
+          window.open(url, '_blank');
+        },
+
+        formatBRL(valor) {
+          return valor.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL', maximumFractionDigits: 0 });
+        }
+      }
+    }
+  </script>
+
+  <!-- Tailwind CDN -->
+  <script src="https://cdn.tailwindcss.com/3.4.3"></script>
+  <!-- Alpine Plugins -->
+  <script src="https://cdn.jsdelivr.net/npm/@alpinejs/collapse@3.14.1/dist/cdn.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/alpinejs@3.14.1/dist/cdn.min.js"></script>
+
+  <style>
+    /* ═══════════════════════════════════════════════
+       🎨 VARIÁVEIS DE TEMA E CORES
+    ═══════════════════════════════════════════════ */
+    :root[data-theme="dark"] {
+      --bg-main:        #0f172a; /* Azul Marinho profundo */
+      --bg-card:        #1e293b; /* Azul levemente mais claro pros cards */
+      --text-main:      #f8fafc;
+      --text-muted:     #cbd5e1; 
+      --border-color:   rgba(255, 255, 255, 0.08);
+      --pattern-color:  rgba(14, 165, 233, 0.05); /* Bolinhas azuis sutis */
+    }
+
+    :root[data-theme="light"] {
+      --bg-main:        #f8fafc; /* Branco com toque frio (azuladinho) */
+      --bg-card:        #ffffff;
+      --text-main:      #0f172a;
+      --text-muted:     #475569;
+      --border-color:   rgba(2, 132, 199, 0.15); /* Bordas em tom de azul */
+      --pattern-color:  rgba(2, 132, 199, 0.12); /* Padrões de fundo mais visíveis e azuis na versão clara */
+    }
+
+    :root[data-theme="dark"] { --bg-nav: rgba(15, 23, 42, 0.95); }
+    :root[data-theme="light"] { --bg-nav: rgba(248, 250, 252, 0.95); }
+
+    *, *::before, *::after { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      background-color: var(--bg-main);
+      color: var(--text-main);
+      font-family: 'Inter', system-ui, sans-serif;
+      overflow-x: hidden;
+      transition: background-color 0.3s ease, color 0.3s ease;
+    }
+
+    /* ── Padrões de Fundo ── */
+    .bg-grid-pattern {
+      background-size: 40px 40px;
+      background-image: 
+        linear-gradient(to right, var(--pattern-color) 1px, transparent 1px),
+        linear-gradient(to bottom, var(--pattern-color) 1px, transparent 1px);
+    }
+    .bg-dots-pattern {
+      background-image: radial-gradient(var(--pattern-color) 2px, transparent 2px);
+      background-size: 24px 24px;
+    }
+
+    /* ── Elemento Separador Elegante c/ Detalhe Laranja ── */
+    .section-divider {
+      height: 1px; width: 100%;
+      background: linear-gradient(90deg, transparent, var(--border-color), transparent);
+      position: relative; z-index: 20;
+    }
+    .section-divider::after {
+      content: ''; position: absolute; top: 50%; left: 50%;
+      transform: translate(-50%, -50%) rotate(45deg);
+      width: 12px; height: 12px;
+      border: 2px solid var(--accent); /* Detalhe Laranja */
+      background: var(--bg-main);
+      box-shadow: 0 0 10px rgba(249, 115, 22, 0.5);
+      transition: background-color 0.3s ease;
+    }
+
+    /* ── Moldura de Contraste para Logos no Tema Claro ── */
+    .logo-frame {
+      display: inline-flex; flex-direction: row;
+      align-items: center; justify-content: center;
+      transition: all 0.3s ease;
+      padding: 8px 16px; border-radius: 12px;
+    }
+    /* Força fundo Azul Escuro (Navy) nas logos brancas quando o site estiver no modo claro */
+    [data-theme="light"] .logo-frame {
+      background-color: var(--navy) !important;
+      border: 1px solid rgba(2, 132, 199, 0.3) !important;
+      box-shadow: 0 8px 20px -4px rgba(2, 132, 199, 0.25) !important;
+    }
+
+    .card {
+      background-color: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: 16px;
+      box-shadow: 0 10px 25px -5px rgba(0,0,0,0.05);
+      transition: background-color 0.3s ease, border-color 0.3s ease;
+    }
+
+    .text-primary-color { color: var(--primary); }
+    .bg-primary-color   { background-color: var(--primary); }
+    .border-primary     { border-color: var(--primary); }
+    .text-accent        { color: var(--accent); }
+
+    /* ── Botões CTA Amarelos com Shimmer ── */
+    .btn-primary {
+      background: linear-gradient(135deg, var(--cta), #eab308); /* AMARELO CTA */
+      color: #0f172a; /* Texto escuro para dar leitura no amarelo */
+      font-weight: 900; border-radius: 50px;
+      padding: 14px 32px; border: none; display: inline-flex;
+      align-items: center; justify-content: center; gap: 8px;
+      transition: transform .2s, box-shadow .2s;
+      position: relative; overflow: hidden;
+      box-shadow: 0 8px 25px rgba(250, 204, 21, 0.3); 
+    }
+    .btn-primary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 30px rgba(250, 204, 21, 0.6);
+    }
+    .btn-primary::after {
+      content: ''; position: absolute; top: 0; left: -150%;
+      width: 50%; height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.6), transparent);
+      transform: skewX(-20deg);
+      animation: btnShine 3.5s infinite;
+    }
+    @keyframes btnShine {
+      0%, 20% { left: -150%; }
+      80%, 100% { left: 200%; }
+    }
+
+    /* Shimmer nos Textos (Azul Brilhando) */
+    .text-shimmer {
+      background: linear-gradient(90deg, var(--primary) 0%, #fff 25%, var(--primary) 50%);
+      background-size: 200% auto;
+      color: transparent;
+      -webkit-background-clip: text;
+      background-clip: text;
+      animation: textShine 4s linear infinite;
+      display: inline-block;
+    }
+    [data-theme="light"] .text-shimmer {
+      background: linear-gradient(90deg, var(--primary) 0%, #0f172a 25%, var(--primary) 50%);
+      background-size: 200% auto; color: transparent;
+      -webkit-background-clip: text; background-clip: text;
+    }
+    @keyframes textShine { to { background-position: 200% center; } }
+
+    /* Botão Outline Hoverado Laranja */
+    .btn-outline {
+      border: 2px solid var(--border-color);
+      padding: 14px 24px; border-radius: 12px; font-weight: 700;
+      transition: all 0.3s ease; width: 100%; display: inline-flex;
+      align-items: center; justify-content: center; gap: 8px;
+      color: var(--text-main); background: transparent;
+    }
+    .btn-outline:hover {
+      border-color: var(--accent); /* Hover Laranja */
+      color: var(--accent);
+      background: rgba(249, 115, 22, 0.08); transform: translateY(-2px);
+    }
+
+    /* ── Preloader ── */
+    #preloader {
+      position: fixed; inset: 0; z-index: 9999; background: var(--bg-main);
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      transition: opacity .5s ease, visibility .5s ease;
+    }
+    #preloader.hidden { opacity: 0; visibility: hidden; pointer-events: none; }
+    .loader-bar {
+      width: 240px; height: 4px; background: var(--border-color);
+      border-radius: 99px; overflow: hidden;
+    }
+    .loader-bar-fill {
+      height: 100%; background: var(--accent); border-radius: 99px;
+      animation: loadFill 2.2s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+    }
+    @keyframes loadFill { 0% { width: 0% } 50% { width: 70% } 100% { width: 100% } }
+
+    /* ── Navbar ── */
+    nav {
+      position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+      transition: background 0.3s, border-bottom 0.3s, padding 0.3s;
+      border-bottom: 1px solid transparent; padding: 14px 0;
+    }
+    nav.scrolled {
+      background: var(--bg-nav);
+      backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px);
+      border-bottom: 1px solid rgba(255,255,255,0.05); padding: 10px 0;
+    }
+    .nav-force-dark-theme { color: #f1f5f9; }
+
+    /* ── Menu Mobile ── */
+    .mobile-menu {
+      position: fixed; inset: 0; background: var(--bg-main); z-index: 99;
+      display: flex; flex-direction: column; padding: 120px 24px 24px;
+      transform: translateX(100%); transition: transform 0.4s ease;
+    }
+    .mobile-menu.open { transform: translateX(0); }
+
+    /* ── Hero ── */
+    .hero-bg {
+      position: relative; background-color: transparent;
+    }
+    .hero-bg::before {
+      content: ''; position: absolute; inset: 0;
+      background: url('https://images.unsplash.com/photo-1509391366360-2e959784a276?w=1600&q=80') center/cover no-repeat;
+      opacity: 0.15; mix-blend-mode: luminosity;
+    }
+    .hero-bg::after {
+      content: ''; position: absolute; inset: 0;
+      background: linear-gradient(to bottom, transparent, var(--bg-main));
+    }
+
+    /* ── Ticker Azul ── */
+    .ticker-track {
+      display: flex; width: max-content; animation: ticker 35s linear infinite;
+    }
+    .ticker-track:hover { animation-play-state: paused; }
+    @keyframes ticker { from { transform: translateX(0); } to { transform: translateX(-50%); } }
+
+    /* ── Slider customizado ── */
+    input[type=range] {
+      -webkit-appearance: none; width: 100%; height: 6px;
+      background: var(--border-color); border-radius: 99px; outline: none;
+    }
+    input[type=range]::-webkit-slider-thumb {
+      -webkit-appearance: none; width: 26px; height: 26px; border-radius: 50%;
+      background: var(--primary); cursor: pointer;
+      box-shadow: 0 0 15px rgba(2, 132, 199, 0.5); transition: transform .15s;
+    }
+    input[type=range]::-webkit-slider-thumb:active { transform: scale(1.2); }
+
+    .no-scrollbar::-webkit-scrollbar { display: none; }
+    .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+
+    .reveal { opacity: 0; transform: translateY(24px); transition: opacity .6s ease, transform .6s ease; }
+    .reveal.visible { opacity: 1; transform: translateY(0); }
+
+    /* ═════════════════════════════════════════════════════════
+       🚨 FIX DEFINITIVO: BOTÕES FLUTUANTES (WHATSAPP/INSTAGRAM)
+    ═════════════════════════════════════════════════════════ */
+    .floating-container {
+      position: fixed !important;
+      bottom: 24px !important;
+      right: 20px !important;
+      z-index: 9999 !important; /* Sempre acima de tudo */
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      align-items: center;
+      pointer-events: auto;
+    }
+    .wa-float {
+      background: #25d366; width: 56px; height: 56px; border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      box-shadow: 0 4px 20px rgba(37,211,102,.5); animation: waPulse 2.5s infinite;
+      cursor: pointer; transition: transform 0.2s;
+    }
+    .wa-float:hover { transform: scale(1.1); }
+    @keyframes waPulse {
+      0%,100% { box-shadow: 0 4px 20px rgba(37,211,102,.5); }
+      50%      { box-shadow: 0 4px 40px rgba(37,211,102,.8); }
+    }
+    .ig-float {
+      background: linear-gradient(45deg, #f09433 0%, #e6683c 25%, #dc2743 50%, #cc2366 75%, #bc1888 100%);
+      width: 48px; height: 48px; border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      box-shadow: 0 4px 15px rgba(220, 39, 67, 0.4); cursor: pointer; transition: transform 0.2s;
+    }
+    .ig-float:hover { transform: scale(1.1); }
+
+    .stars { color: var(--cta); letter-spacing: 2px; }
+
+    .section-tag {
+      background: rgba(249, 115, 22, 0.12); border: 1px solid rgba(249, 115, 22, 0.25);
+      color: var(--accent); padding: 6px 16px; border-radius: 99px;
+      font-size: 13px; font-weight: 800; letter-spacing: .08em; text-transform: uppercase;
+    }
+
+    [x-cloak] { display: none !important; }
+  </style>
+</head>
+<body x-data="solarApp()" x-init="init()" :class="menuAberto ? 'overflow-hidden' : ''">
+
+<!-- ══════════════════════════════════════ MARCA D'ÁGUA FIXA (FUNDO) ══════════ -->
+<div class="fixed inset-0 z-0 flex items-center justify-center pointer-events-none overflow-hidden opacity-[0.03] dark:opacity-[0.02]">
+  <img :src="CONFIG.logoCompletaUrl" alt="Marca d'água Solltech" class="w-[85vw] md:w-[60vw] max-w-4xl object-contain grayscale" />
+</div>
+
+<!-- ══════════════════════════════════════ PRELOADER ══════════ -->
+<div id="preloader" role="status" aria-label="Carregando">
+  <div class="flex flex-col items-center text-center px-4 relative z-50">
+    <!-- Logotipos no Preloader (Com moldura inteligente para Light Mode) -->
+    <div class="logo-frame mb-10 gap-6 px-8 py-5">
+      <div class="relative w-16 h-16 sm:w-20 sm:h-20 flex items-center justify-center">
+        <div class="absolute inset-0 bg-primary/20 rounded-full animate-ping"></div>
+        <img :src="CONFIG.iconUrl" alt="Ícone Solltech" class="w-full h-full object-contain relative z-10" />
+      </div>
+      <img :src="CONFIG.logoCompletaUrl" alt="Solltech Solar" class="h-8 sm:h-12 object-contain relative z-10" />
+    </div>
+
+    <!-- Barra de carregamento e Textos em ordem invertida -->
+    <p class="text-xs tracking-widest uppercase font-bold text-accent mb-5">Sincronizando Parâmetros de Economia...</p>
+    <div class="loader-bar mb-6"><div class="loader-bar-fill"></div></div>
+    <h2 class="text-xl sm:text-2xl font-black" style="color: var(--text-main);">Engenharia de Alta Performance</h2>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════ NAVBAR & MENU MOBILE ══════════ -->
+<nav :class="navScrolled ? 'scrolled' : ''" role="navigation">
+  <div class="max-w-7xl mx-auto px-4 lg:px-8 flex items-center justify-between">
+    
+    <!-- Ambas as logos na Navbar (Quadrada + Horizontal MAIOR) -->
+    <div class="flex items-center z-[101] relative">
+      <div class="logo-frame gap-3 !px-3 !py-1.5">
+        <img :src="CONFIG.iconUrl" alt="Ícone Solltech" class="h-8 md:h-10 object-contain" />
+        <img :src="CONFIG.logoCompletaUrl" alt="Solltech Solar" class="h-9 md:h-12 object-contain hidden sm:block" />
+      </div>
+    </div>
+
+    <div class="hidden md:flex items-center gap-6 z-[101] relative nav-force-dark-theme">
+      <button @click="toggleTheme" class="text-2xl hover:scale-110 transition-transform" aria-label="Alternar Tema">
+        <span x-show="theme === 'dark'" x-cloak>☀️</span>
+        <span x-show="theme === 'light'" x-cloak>🌙</span>
+      </button>
+      <button @click="abrirWhatsApp('navbar')" class="btn-primary text-sm px-7 py-3">
+        Simular Economia ⚡
+      </button>
+    </div>
+
+    <div class="md:hidden flex items-center gap-4 z-[101] relative nav-force-dark-theme">
+      <button @click="toggleTheme" class="text-xl" aria-label="Alternar Tema">
+        <span x-show="theme === 'dark'" x-cloak>☀️</span>
+        <span x-show="theme === 'light'" x-cloak>🌙</span>
+      </button>
+      <button @click="toggleMenu" class="p-2" aria-label="Menu">
+        <svg x-show="!menuAberto" class="w-9 h-9" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7"></path></svg>
+        <svg x-show="menuAberto" x-cloak class="w-9 h-9" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+      </button>
+    </div>
+  </div>
+</nav>
+
+<div class="mobile-menu" :class="menuAberto ? 'open' : ''">
+  <div class="flex flex-col gap-6 text-center">
+    <div class="mx-auto mb-8 flex flex-col items-center gap-4">
+      <div class="logo-frame flex-col gap-4">
+        <img :src="CONFIG.iconUrl" alt="Logo Solltech" class="h-14 object-contain" />
+        <img :src="CONFIG.logoCompletaUrl" alt="Solltech Solar" class="h-10 object-contain" />
+      </div>
+    </div>
+    
+    <a href="#simulador" @click="toggleMenu" class="text-xl font-bold" style="color: var(--text-main);">Simulador Interativo</a>
+    <a href="#quem-somos" @click="toggleMenu" class="text-xl font-bold" style="color: var(--text-main);">Engenharia</a>
+    <a href="#portfolio" @click="toggleMenu" class="text-xl font-bold" style="color: var(--text-main);">Obras e Avaliações</a>
+    
+    <div class="mt-8 pt-8 border-t border-[var(--border-color)]">
+      <button @click="abrirWhatsApp('menu_mobile'); toggleMenu()" class="btn-primary text-lg w-full py-4 mb-4">
+        Falar com Especialista
+      </button>
+      <a :href="CONFIG.instagram" target="_blank" class="btn-outline w-full py-4">
+        Siga nosso Instagram
+      </a>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════ HERO ══════════ -->
+<section class="hero-bg min-h-screen flex items-center pt-28 pb-20 px-4 relative z-10 overflow-hidden">
+  <div class="absolute inset-0 bg-grid-pattern opacity-60 pointer-events-none"></div>
+  
+  <div class="max-w-4xl mx-auto text-center w-full relative z-20">
+    <div class="bg-[var(--bg-card)] border border-[var(--border-color)] text-[var(--text-main)] px-5 py-2 rounded-full text-xs sm:text-sm font-bold inline-flex items-center gap-2 mb-8 shadow-md">
+      <span class="w-2.5 h-2.5 rounded-full animate-pulse" style="background-color: var(--accent)"></span>
+      <span x-text="'Apenas ' + CONFIG.vagas + ' vagas para instalação este mês'"></span>
+    </div>
+
+    <h1 class="font-black leading-tight mb-6" style="font-size:clamp(2.4rem,6vw,4.5rem);">
+      Sua conta de luz no
+      <span class="text-primary-color border-b-4 border-primary" x-text="CONFIG.bairros"></span><br>
+      pode <span class="text-shimmer">cair até 95%</span>
+    </h1>
+
+    <p class="text-lg md:text-xl mb-10 max-w-2xl mx-auto font-bold" style="color:var(--text-muted);">
+      Projetos da Solltech são assinados por engenheiros experientes. Retorno financeiro em <strong>menos de 3 anos</strong> com proteção total contra vazamentos.
+    </p>
+
+    <div class="flex flex-col sm:flex-row gap-4 justify-center">
+      <button @click="abrirWhatsApp('hero')" class="btn-primary text-lg px-8 py-5">
+        Simular Minha Economia ⚡
+      </button>
+      <a href="#quiz" class="btn-outline text-lg px-8 py-5 bg-[var(--bg-card)]">
+        Fazer Diagnóstico Rápido
+      </a>
+    </div>
+
+    <div class="flex flex-col sm:flex-row flex-wrap justify-center items-center sm:gap-8 gap-4 mt-16 text-sm sm:text-base font-bold" style="color:var(--text-muted);">
+      
+      <span class="flex items-center gap-3 text-primary-color">
+        <span class="relative flex h-3.5 w-3.5 flex-shrink-0">
+          <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-[var(--accent)] opacity-75"></span>
+          <span class="relative inline-flex rounded-full h-3.5 w-3.5 bg-[var(--accent)]"></span>
+        </span>
+        <span class="text-[var(--text-muted)]">+500 instalações no Rio de Janeiro</span>
+      </span>
+      
+      <span class="flex items-center gap-3 text-primary-color">
+        <span class="relative flex h-3.5 w-3.5 flex-shrink-0">
+          <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-[var(--accent)] opacity-75"></span>
+          <span class="relative inline-flex rounded-full h-3.5 w-3.5 bg-[var(--accent)]"></span>
+        </span>
+        <span class="text-[var(--text-muted)]">Aprovação Enel/Light inclusa</span>
+      </span>
+      
+      <span class="flex items-center gap-3 text-primary-color">
+        <span class="relative flex h-3.5 w-3.5 flex-shrink-0">
+          <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-[var(--accent)] opacity-75"></span>
+          <span class="relative inline-flex rounded-full h-3.5 w-3.5 bg-[var(--accent)]"></span>
+        </span>
+        <span class="text-[var(--text-muted)]">Financiamento sem entrada</span>
+      </span>
+
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════════ TICKER TOPO ══════════ -->
+<div style="background:var(--primary);overflow:hidden;padding:12px 0; position:relative; z-10" aria-hidden="true">
+  <div class="ticker-track">
+    <template x-for="_ in [1,2,3]">
+      <div class="flex items-center gap-8 pr-8" style="white-space:nowrap;">
+        <span class="font-bold text-sm text-[#ffffff] px-4 uppercase tracking-wider drop-shadow-sm">⚡ Instalação em 48h</span><span class="text-white/30">•</span>
+        <span class="font-bold text-sm text-[#ffffff] px-4 uppercase tracking-wider drop-shadow-sm">📈 Imóvel Valorizado</span><span class="text-white/30">•</span>
+        <span class="font-bold text-sm text-[#ffffff] px-4 uppercase tracking-wider drop-shadow-sm">🔋 Tecnologia Solltech</span><span class="text-white/30">•</span>
+        <span class="font-bold text-sm text-[#ffffff] px-4 uppercase tracking-wider drop-shadow-sm">💡 95% de Economia</span><span class="text-white/30">•</span>
+        <span class="font-bold text-sm text-[#ffffff] px-4 uppercase tracking-wider drop-shadow-sm">🏦 Até 84x</span><span class="text-white/30">•</span>
+        <span class="font-bold text-sm text-[#ffffff] px-4 uppercase tracking-wider drop-shadow-sm">🔒 25 Anos Garantia</span><span class="text-white/30">•</span>
+      </div>
+    </template>
+  </div>
+</div>
+
+<div class="section-divider"></div>
+
+<!-- ═══════════════════════════════════════ SIMULADOR ══════════ -->
+<section id="simulador" class="py-24 px-4 relative z-10">
+  <div class="max-w-2xl mx-auto reveal">
+    <div class="text-center mb-10">
+      <span class="section-tag">Simulador Inteligente</span>
+      <h2 class="text-3xl font-black mt-4">Quanto você vai economizar?</h2>
+      <p style="color:var(--text-muted)" class="mt-2 font-medium">Arraste o slider e veja o cálculo em tempo real</p>
+    </div>
+
+    <div class="card p-8">
+      <div class="mb-8">
+        <div class="flex justify-between items-center mb-3">
+          <label class="text-sm font-bold" style="color:var(--text-muted)">Valor da sua conta de luz atual</label>
+          <span class="font-black text-2xl text-primary-color" x-text="formatBRL(contaLuz)"></span>
+        </div>
+        <input
+          type="range"
+          x-model.number="contaLuz"
+          min="150" max="3000" step="50"
+          aria-label="Valor da conta de luz"
+        />
+        <div class="flex justify-between text-xs mt-2 font-bold" style="color:var(--text-muted);">
+          <span>R$ 150</span><span>R$ 3.000</span>
+        </div>
+      </div>
+
+      <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-8">
+        <div class="card text-center p-5" style="background:rgba(2, 132, 199,.05);border-color:rgba(2, 132, 199,.15);">
+          <p class="text-xs mb-1 font-bold" style="color:var(--text-muted);">Economia no 1º Ano</p>
+          <p class="text-2xl font-black text-primary-color" x-text="formatBRL(economiaAnual)"></p>
+        </div>
+        <div class="card text-center p-5" style="background:rgba(249, 115, 22,.05);border-color:rgba(249, 115, 22,.15);">
+          <p class="text-xs mb-1 font-bold" style="color:var(--text-muted);">Retorno Estimado</p>
+          <p class="text-2xl font-black text-accent" x-text="retornoMeses + ' meses'"></p>
+        </div>
+        <div class="card text-center p-5" style="background:rgba(34, 197, 94,.05);border-color:rgba(34, 197, 94,.15);">
+          <p class="text-xs mb-1 font-bold" style="color:var(--text-muted);">Economia em 25 anos</p>
+          <p class="text-2xl font-black" style="color:#22c55e;" x-text="formatBRL(economia25anos)"></p>
+        </div>
+      </div>
+
+      <p class="text-xs text-center mb-6 font-bold" style="color:var(--text-muted);">
+        * Cálculo inclui reajuste tarifário médio de 9% a.a. Estimativa sem compromisso.
+      </p>
+
+      <button @click="abrirWhatsApp('simulador')" class="btn-primary w-full text-lg py-5">
+        Quero essa economia! Falar com especialista →
+      </button>
+    </div>
+  </div>
+</section>
+
+<div class="section-divider"></div>
+
+<!-- ═══════════════════════════════════════ BENEFÍCIOS ══════════ -->
+<section class="py-20 px-4 relative z-10" style="background:rgba(2, 132, 199, 0.02);">
+  <div class="max-w-5xl mx-auto">
+    <div class="text-center mb-14 reveal">
+      <span class="section-tag">Por que escolher a Solltech</span>
+      <h2 class="text-3xl font-black mt-4">Instalação que <span class="text-shimmer">protege seu imóvel</span></h2>
+    </div>
+
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+      <div class="card p-6 reveal" style="transition-delay:.1s">
+        <div class="w-12 h-12 rounded-xl flex items-center justify-center mb-4 text-2xl" style="background:rgba(2, 132, 199,.12);">🔒</div>
+        <h3 class="font-bold text-lg mb-2">Engenharia Estrutural</h3>
+        <p style="color:var(--text-muted);" class="text-sm font-medium">Usamos calhas e fixações certificadas. Laudo estrutural incluso em todos os projetos da Solltech.</p>
+      </div>
+      <div class="card p-6 reveal" style="transition-delay:.2s">
+        <div class="w-12 h-12 rounded-xl flex items-center justify-center mb-4 text-2xl" style="background:rgba(249, 115, 22,.12);">📈</div>
+        <h3 class="font-bold text-lg mb-2">Valoriza seu Imóvel</h3>
+        <p style="color:var(--text-muted);" class="text-sm font-medium">Imóveis com energia solar vendem até 8% mais caro, segundo pesquisa FGV 2024.</p>
+      </div>
+      <div class="card p-6 reveal" style="transition-delay:.3s">
+        <div class="w-12 h-12 rounded-xl flex items-center justify-center mb-4 text-2xl" style="background:rgba(34, 197, 94,.12);">⚡</div>
+        <h3 class="font-bold text-lg mb-2">Instalação Ágil</h3>
+        <p style="color:var(--text-muted);" class="text-sm font-medium">Da assinatura à ativação. Equipe técnica própria de ponta, sem terceirização do serviço.</p>
+      </div>
+      <div class="card p-6 reveal" style="transition-delay:.4s">
+        <div class="w-12 h-12 rounded-xl flex items-center justify-center mb-4 text-2xl" style="background:rgba(250, 204, 21,.12);">🏦</div>
+        <h3 class="font-bold text-lg mb-2">Financiamento Facilitado</h3>
+        <p style="color:var(--text-muted);" class="text-sm font-medium">Parcelas que cabem no bolso. Muitas vezes, a parcela do banco é menor que a conta de luz.</p>
+      </div>
+      <div class="card p-6 reveal" style="transition-delay:.5s">
+        <div class="w-12 h-12 rounded-xl flex items-center justify-center mb-4 text-2xl" style="background:rgba(2, 132, 199,.12);">📋</div>
+        <h3 class="font-bold text-lg mb-2">Homologação Inclusa</h3>
+        <p style="color:var(--text-muted);" class="text-sm font-medium">Nossa equipe cuida de toda a burocracia com a concessionária. Você não se preocupa com nada.</p>
+      </div>
+      <div class="card p-6 reveal" style="transition-delay:.6s">
+        <div class="w-12 h-12 rounded-xl flex items-center justify-center mb-4 text-2xl" style="background:rgba(249, 115, 22,.12);">🌧️</div>
+        <h3 class="font-bold text-lg mb-2">Funciona Nublado</h3>
+        <p style="color:var(--text-muted);" class="text-sm font-medium">Painéis de última geração. Produzem energia mesmo com pouca incidência solar.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="section-divider"></div>
+
+<!-- ═══════════════════════════════════════ MINI QUIZ PREMIUM (Com Animações) ══════════ -->
+<section id="quiz" class="py-24 px-4 relative z-10">
+  <div class="absolute inset-0 bg-dots-pattern opacity-70 pointer-events-none"></div>
+  
+  <div class="max-w-3xl mx-auto text-center reveal relative z-10">
+    <div class="card p-8 sm:p-12 relative overflow-hidden border-t-4 border-t-[var(--accent)] shadow-2xl">
+      <div class="absolute -top-32 -left-32 w-64 h-64 bg-primary/10 blur-[80px] rounded-full pointer-events-none"></div>
+      
+      <div class="mb-10 flex flex-col items-center relative z-10">
+        <span class="section-tag mb-6">Análise Rápida</span>
+        
+        <div class="logo-frame mb-8 !px-4 !py-2">
+          <img :src="CONFIG.logoCompletaUrl" alt="Logo Solltech" class="h-8 md:h-12 object-contain" />
+        </div>
+        
+        <div class="w-full max-w-md bg-black/10 dark:bg-white/5 border border-black/5 dark:border-white/10 rounded-full h-3.5 mb-3 relative overflow-hidden shadow-inner">
+          <div class="h-full rounded-full transition-all duration-500 ease-out" 
+               :style="`width: ${(quizPasso / 5) * 100}%; background-color: var(--accent); box-shadow: 0 0 12px var(--accent);`">
+          </div>
+        </div>
+        <p class="text-xs font-black text-accent uppercase tracking-widest" x-show="quizPasso < 5" x-text="`Passo ${quizPasso} de 4`"></p>
+      </div>
+      
+      <div class="min-h-[260px] flex flex-col justify-center relative">
+        <!-- PASSO 1 -->
+        <div x-show="quizPasso === 1" x-transition.opacity.duration.400ms class="relative z-10 w-full absolute inset-0 flex flex-col justify-center">
+          <h3 class="text-2xl sm:text-3xl font-black mb-8">Qual o valor médio da sua conta de luz?</h3>
+          <div class="flex flex-col gap-4 max-w-md mx-auto w-full">
+            <button @click="responderQuiz('valor', 'Abaixo de R$ 300')" class="btn-outline justify-start px-6 py-5 text-lg hover:pl-8">💡 Abaixo de R$ 300</button>
+            <button @click="responderQuiz('valor', 'R$ 300 a R$ 800')" class="btn-outline justify-start px-6 py-5 text-lg hover:pl-8">⚡ R$ 300 a R$ 800</button>
+            <button @click="responderQuiz('valor', 'Acima de R$ 800')" class="btn-outline justify-start px-6 py-5 text-lg hover:pl-8">🔥 Acima de R$ 800</button>
+          </div>
+        </div>
+
+        <!-- PASSO 2 -->
+        <div x-show="quizPasso === 2" x-cloak x-transition.opacity.duration.400ms class="relative z-10 w-full absolute inset-0 flex flex-col justify-center">
+          <h3 class="text-2xl sm:text-3xl font-black mb-8">Como é o telhado do seu imóvel?</h3>
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 max-w-lg mx-auto w-full">
+            <button @click="responderQuiz('telhado', 'Laje Maciça')" class="btn-outline py-6 flex-col text-lg"><span>🏗️</span> Laje Maciça</button>
+            <button @click="responderQuiz('telhado', 'Telha Colonial')" class="btn-outline py-6 flex-col text-lg"><span>🏠</span> Telha Colonial</button>
+            <button @click="responderQuiz('telhado', 'Telha Metálica')" class="btn-outline py-6 flex-col text-lg"><span>🏭</span> Telha Metálica</button>
+            <button @click="responderQuiz('telhado', 'Não informado')" class="btn-outline py-6 flex-col text-lg"><span>❓</span> Não sei informar</button>
+          </div>
+        </div>
+
+        <!-- PASSO 3 -->
+        <div x-show="quizPasso === 3" x-cloak x-transition.opacity.duration.400ms class="relative z-10 w-full absolute inset-0 flex flex-col justify-center">
+          <h3 class="text-2xl sm:text-3xl font-black mb-8">O imóvel onde deseja instalar é próprio?</h3>
+          <div class="flex flex-col sm:flex-row gap-4 justify-center max-w-lg mx-auto w-full">
+            <button @click="responderQuiz('posse', 'Próprio')" class="btn-outline py-5 text-lg">🔑 Sim, próprio</button>
+            <button @click="responderQuiz('posse', 'Alugado')" class="btn-outline py-5 text-lg">📄 Alugado</button>
+            <button @click="responderQuiz('posse', 'Em construção')" class="btn-outline py-5 text-lg">🚧 Em construção</button>
+          </div>
+        </div>
+
+        <!-- PASSO 4 -->
+        <div x-show="quizPasso === 4" x-cloak x-transition.opacity.duration.400ms class="relative z-10 w-full absolute inset-0 flex flex-col justify-center">
+          <h3 class="text-2xl sm:text-3xl font-black mb-8">Em qual horário você consome mais energia?</h3>
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 max-w-lg mx-auto w-full">
+            <button @click="responderQuiz('horario', 'Durante o dia')" class="btn-outline py-5 text-lg">☀️ Durante o dia</button>
+            <button @click="responderQuiz('horario', 'Apenas à noite')" class="btn-outline py-5 text-lg">🌙 Apenas à noite</button>
+            <button @click="responderQuiz('horario', 'O dia todo')" class="btn-outline py-5 text-lg">🔄 O dia e noite todo</button>
+            <button @click="responderQuiz('horario', 'Horário Comercial')" class="btn-outline py-5 text-lg">🏢 Horário Comercial</button>
+          </div>
+        </div>
+
+        <!-- PASSO 5 (Resultado) -->
+        <div x-show="quizPasso === 5" x-cloak x-transition.opacity.duration.600ms class="relative z-10 w-full absolute inset-0 flex flex-col justify-center">
+          <div class="w-24 h-24 mx-auto bg-green-500/10 rounded-full flex items-center justify-center mb-6 shadow-lg">
+            <span class="text-5xl">🎉</span>
+          </div>
+          <h3 class="text-3xl sm:text-4xl font-black mb-4 text-[#22c55e]">Perfil Aprovado!</h3>
+          <p class="mb-10 text-lg md:text-xl font-bold max-w-xl mx-auto" style="color:var(--text-muted);">
+            Imóveis com conta <strong style="color:var(--text-main)" x-text="quizRespostas.valor"></strong> e telhado <strong style="color:var(--text-main)" x-text="quizRespostas.telhado"></strong> 
+            têm altíssimo potencial de economia em <span style="color:var(--text-main)" x-text="CONFIG.cidade"></span>.
+          </p>
+          <button @click="abrirWhatsApp('quiz_aprovado')" class="btn-primary text-lg w-full sm:w-auto px-10 py-5">
+            Receber Orçamento Grátis
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="section-divider"></div>
+
+<!-- ════════════════════════════════════ QUEM SOMOS NÓS (COM VÍDEO E BOLHAS) ════════════════════════ -->
+<section id="quem-somos" class="py-24 px-4 relative z-10">
+  <div class="absolute inset-0 bg-grid-pattern opacity-40 pointer-events-none"></div>
+  <div class="max-w-6xl mx-auto flex flex-col lg:flex-row items-center gap-12 lg:gap-16 relative z-10">
+    
+    <!-- CONTEÚDO (No mobile aparece primeiro o Título, depois vídeo, depois os bullets) -->
+    <div class="w-full lg:w-1/2 flex flex-col reveal order-1 lg:order-2">
+      <div class="mb-6 flex flex-col items-start">
+        <span class="section-tag mb-4">QUEM SOMOS NÓS</span>
+        <h2 class="text-3xl md:text-4xl font-black mb-2 leading-tight">
+          Nossa <span class="text-primary-color">Estrutura e Qualidade</span>
+        </h2>
+        <p class="text-xl font-black uppercase tracking-widest text-[var(--text-muted)]">Conheça a Solltech</p>
+      </div>
+
+      <!-- VÍDEO (Mobile: Posicionado entre Título e Texto) -->
+      <div class="w-full lg:hidden relative mb-8 rounded-[2rem] overflow-hidden shadow-2xl border border-[var(--border-color)] aspect-[4/5]">
+        <div class="absolute inset-0 bg-primary/10 animate-pulse mix-blend-overlay z-10 pointer-events-none"></div>
+        <video src="https://res.cloudinary.com/dm9mnc97u/video/upload/v1774023991/SnapInsta.to_AQMEg6dC-wEnxKYjwaDZvqjFkrlCpWiBVrkAp6OYgR-yUKzTTyMXzMn9KVk3kVDuLIWeWGVOkQDt31jDx9IkN4qmnUThlWkPiy_WiqE_jf2uob.webm" 
+               autoplay loop muted playsinline 
+               class="absolute inset-0 w-full h-full object-cover z-0"></video>
+      </div>
+
+      <p class="mb-8 text-lg font-bold leading-relaxed" style="color:var(--text-muted);">
+        Na Solltech, não entregamos apenas placas solares; entregamos obras de engenharia rigorosas. Assista ao vídeo e veja o padrão de acabamento que levamos para o seu telhado.
+      </p>
+
+      <ul class="space-y-6 mb-10 text-base md:text-lg font-bold">
+        <li class="flex items-center gap-4">
+          <span class="relative flex h-4 w-4 flex-shrink-0">
+            <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-[var(--accent)] opacity-75"></span>
+            <span class="relative inline-flex rounded-full h-4 w-4 bg-[var(--accent)]"></span>
+          </span>
+          <span style="color:var(--text-main)">Padrão de Acabamento Impecável</span>
+        </li>
+        <li class="flex items-center gap-4">
+          <span class="relative flex h-4 w-4 flex-shrink-0">
+            <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-[var(--accent)] opacity-75"></span>
+            <span class="relative inline-flex rounded-full h-4 w-4 bg-[var(--accent)]"></span>
+          </span>
+          <span style="color:var(--text-main)">Segurança e Engenharia Própria</span>
+        </li>
+        <li class="flex items-center gap-4">
+          <span class="relative flex h-4 w-4 flex-shrink-0">
+            <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-[var(--accent)] opacity-75"></span>
+            <span class="relative inline-flex rounded-full h-4 w-4 bg-[var(--accent)]"></span>
+          </span>
+          <span style="color:var(--text-main)">Estruturas de Alta Durabilidade</span>
+        </li>
+      </ul>
+
+      <div class="flex flex-col sm:flex-row gap-4">
+        <button @click="abrirWhatsApp('video_quem_somos')" class="btn-primary text-base">
+          Falar com a Engenharia
+        </button>
+      </div>
+    </div>
+
+    <!-- VÍDEO (Desktop: Posicionado na Esquerda) -->
+    <div class="hidden lg:block lg:w-1/2 w-full reveal relative order-2 lg:order-1">
+      <div class="absolute -inset-4 bg-primary/20 blur-3xl rounded-full opacity-40"></div>
+      <div class="relative w-full aspect-[4/5] rounded-[2rem] overflow-hidden shadow-2xl border border-[var(--border-color)]">
+        <div class="absolute inset-0 bg-primary/10 animate-pulse mix-blend-overlay z-10 pointer-events-none"></div>
+        <video src="https://res.cloudinary.com/dm9mnc97u/video/upload/v1774023991/SnapInsta.to_AQMEg6dC-wEnxKYjwaDZvqjFkrlCpWiBVrkAp6OYgR-yUKzTTyMXzMn9KVk3kVDuLIWeWGVOkQDt31jDx9IkN4qmnUThlWkPiy_WiqE_jf2uob.webm" 
+               autoplay loop muted playsinline 
+               class="absolute inset-0 w-full h-full object-cover z-0"></video>
+        
+        <div class="absolute bottom-6 left-6 z-20 bg-[var(--bg-card)] border border-[var(--border-color)] p-4 rounded-2xl shadow-xl flex items-center gap-4">
+          <div class="w-12 h-12 rounded-full flex items-center justify-center text-2xl" style="background: rgba(249, 115, 22, 0.15);">🏆</div>
+          <div>
+            <p class="font-black text-xl leading-none text-[var(--text-main)]">+500</p>
+            <p class="text-xs font-bold mt-1 uppercase tracking-wider" style="color:var(--text-muted);">Projetos</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<div class="section-divider"></div>
+
+<!-- ════════════════════════════════ PORTFÓLIO + REVIEWS (CARROSSEL) ══════════ -->
+<section id="portfolio" class="py-20 overflow-hidden bg-[var(--bg-main)] relative z-10">
+  <div class="max-w-7xl mx-auto px-4 relative z-10">
+    <div class="text-center mb-12 reveal">
+      <span class="section-tag bg-[var(--bg-card)]">Nossas Obras e Clientes</span>
+      <h2 class="text-3xl font-black mt-4">Projetos Entregues e <span class="text-shimmer">Avaliados</span></h2>
+    </div>
+
+    <div class="carousel-wrap flex gap-6 overflow-x-auto no-scrollbar pb-6 w-full reveal"
+         x-ref="carouselTrack" @mousedown="startDrag" @mousemove="moveDrag" @mouseup="stopDrag"
+         @mouseleave="stopDrag; hoveringCarousel = false" @mouseenter="hoveringCarousel = true"
+         @touchstart="startDrag" @touchmove="moveDrag" @touchend="stopDrag"
+         style="cursor: grab; -webkit-overflow-scrolling: touch;">
+      
+      <template x-for="(item, i) in [...projetosEReviews, ...projetosEReviews]" :key="i">
+        <div class="card flex-shrink-0 w-[320px] sm:w-[350px] flex flex-col pointer-events-none select-none">
+          <div class="relative h-48 w-full border-b border-[var(--border-color)]">
+            <img :src="item.img" alt="Instalação Solar" class="w-full h-full object-cover rounded-t-[15px]" loading="lazy" />
+            <div class="absolute top-3 right-3 bg-[var(--bg-nav)] backdrop-blur-md px-3 py-1 rounded-full text-xs font-bold text-primary-color border border-primary/30" x-text="'Sistema ' + item.kw"></div>
+          </div>
+          <div class="p-6 flex-1 flex flex-col justify-between pointer-events-auto">
+            <div>
+              <div class="stars text-sm mb-3">★★★★★</div>
+              <p class="text-sm leading-relaxed mb-6 font-bold" style="color:var(--text-muted);">"<span x-text="item.texto"></span>"</p>
+            </div>
+            <div class="flex items-center gap-3 mt-auto pt-4 border-t border-[var(--border-color)]">
+              <div class="w-10 h-10 rounded-full flex-shrink-0 flex items-center justify-center font-black text-white text-lg" style="background:linear-gradient(135deg,var(--primary),var(--primary-dark));" x-text="item.nome[0]"></div>
+              <div class="flex-1 min-w-0">
+                <p class="font-bold text-sm truncate" x-text="item.nome"></p>
+                <p class="text-xs truncate font-bold" style="color:var(--text-muted);" x-text="item.bairro"></p>
+              </div>
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" class="w-6 h-6 flex-shrink-0 drop-shadow-md">
+                <path fill="#FFC107" d="M43.611,20.083H42V20H24v8h11.303c-1.649,4.657-6.08,8-11.303,8c-6.627,0-12-5.373-12-12c0-6.627,5.373-12,12-12c3.059,0,5.842,1.154,7.961,3.039l5.657-5.657C34.046,6.053,29.268,4,24,4C12.955,4,4,12.955,4,24c0,11.045,8.955,20,20,20c11.045,0,20-8.955,20-20C44,22.659,43.862,21.35,43.611,20.083z"/>
+                <path fill="#FF3D00" d="M6.306,14.691l6.571,4.819C14.655,15.108,18.961,12,24,12c3.059,0,5.842,1.154,7.961,3.039l5.657-5.657C34.046,6.053,29.268,4,24,4C16.318,4,9.656,8.337,6.306,14.691z"/>
+                <path fill="#4CAF50" d="M24,44c5.166,0,9.86-1.977,13.409-5.192l-6.19-5.238C29.211,35.091,26.715,36,24,36c-5.202,0-9.619-3.317-11.283-7.946l-6.522,5.025C9.505,39.556,16.227,44,24,44z"/>
+                <path fill="#1976D2" d="M43.611,20.083H42V20H24v8h11.303c-0.792,2.237-2.231,4.166-4.087,5.571l6.193,5.236C36.971,39.205,44,34,44,24C44,22.659,43.862,21.35,43.611,20.083z"/>
+              </svg>
+            </div>
+          </div>
+        </div>
+      </template>
+    </div>
+  </div>
+</section>
+
+<div class="section-divider"></div>
+
+<!-- ════════════════════════════════════════ CTA BAND ══════════ -->
+<section class="py-20 px-4 text-center reveal relative z-10">
+  <div class="max-w-2xl mx-auto relative z-10">
+    <div class="bg-[var(--bg-card)] border border-[var(--border-color)] text-[var(--text-main)] px-4 py-1.5 rounded-full text-sm font-bold inline-flex items-center gap-2 mb-6 shadow-sm">
+      <span class="w-2.5 h-2.5 rounded-full animate-pulse" style="background-color: var(--accent);"></span>
+      <span x-text="'Atenção: restam apenas ' + CONFIG.vagas + ' vagas para instalação este mês'"></span>
+    </div>
+    <h2 class="text-3xl md:text-4xl font-black mb-4 leading-tight">Pronto para parar de <span class="text-shimmer">pagar caro</span> pela luz?</h2>
+    <p style="color:var(--text-muted);" class="mb-10 text-lg font-bold">Fale agora com a equipe da <span class="font-black text-[var(--text-main)]" x-text="CONFIG.empresa"></span>. Simulação gratuita, sem compromisso.</p>
+    <button @click="abrirWhatsApp('cta-band')" class="btn-primary text-lg px-12 py-5 w-full sm:w-auto">
+      💬 Falar no WhatsApp Agora
+    </button>
+  </div>
+</section>
+
+<div class="section-divider"></div>
+
+<!-- ══════════════════════════════════════════ FAQ ══════════════ -->
+<section class="py-24 px-4 relative z-10">
+  <div class="max-w-3xl mx-auto relative z-10">
+    <div class="text-center mb-12 reveal">
+      <span class="section-tag bg-[var(--bg-card)]">Dúvidas Frequentes</span>
+      <h2 class="text-3xl font-black mt-4">Perguntas <span class="text-shimmer">respondidas</span></h2>
+    </div>
+
+    <div class="space-y-4">
+      <template x-for="(faq, i) in [
+        {p:'Preciso pagar taxa para a distribuidora?', r:'Não. A homologação do projeto junto à concessionária é inclusa no serviço da Solltech.'},
+        {p:'Tem imposto sobre a energia gerada?', r:'Não há cobrança de ICMS para sistemas de até 500 kW (Lei 14.300/2022).'},
+        {p:'Quanto tempo duram os painéis?', r:'Os painéis têm garantia de performance de 25 anos e vida útil estimada de mais de 30 anos.'},
+        {p:'E se meu telhado tiver vazamento?', r:'Nossa equipe de engenharia usa fixações certificadas. Qualquer infiltração estrutural causada pela instalação é 100% coberta.'},
+        {p:'Posso financiar sem entrada?', r:'Sim. Linhas em até 84 meses, sem entrada. A parcela frequentemente substitui o valor da conta atual.'},
+        {p:'O sistema funciona à noite?', r:'À noite o seu imóvel consome automaticamente os créditos que o sistema gerou e injetou na rede durante o dia.'}
+      ]">
+        <div class="card overflow-hidden reveal">
+          <button class="w-full text-left p-6 flex justify-between items-center hover:bg-[var(--bg-main)] transition-colors" @click="toggleFaq(i)">
+            <span class="font-bold text-base pr-4" x-text="faq.p"></span>
+            <span class="text-primary-color text-2xl transition-transform duration-300" :style="faqAberto === i ? 'transform:rotate(45deg)' : ''">+</span>
+          </button>
+          <div x-show="faqAberto === i" x-collapse x-cloak>
+            <div class="px-6 pb-6 pt-2"><p class="text-base leading-relaxed font-bold" style="color:var(--text-muted);" x-text="faq.r"></p></div>
+          </div>
+        </div>
+      </template>
+    </div>
+  </div>
+</section>
+
+<div class="section-divider"></div>
+
+<!-- ════════════════════════════ ENGENHARIA E MAPA (AUTORIDADE) ════════════ -->
+<section class="py-24 px-4 relative z-10">
+  <div class="absolute inset-0 bg-grid-pattern opacity-40 pointer-events-none"></div>
+  <div class="max-w-6xl mx-auto flex flex-col md:flex-row items-center gap-14 relative z-10">
+    
+    <div class="md:w-1/2 reveal">
+      <div class="logo-frame mb-6 inline-flex flex-row items-center gap-4 !px-4 !py-2">
+        <img :src="CONFIG.iconUrl" class="h-10 object-contain" alt="Solltech" />
+        <img :src="CONFIG.logoCompletaUrl" class="h-6 md:h-8 object-contain" alt="Solltech" />
+      </div>
+      <br>
+      <span class="section-tag bg-[var(--bg-card)]">Engenharia Local</span>
+      <h2 class="text-3xl font-black mt-4 mb-6 leading-tight">Venha tomar um café com nossa diretoria.</h2>
+      <p style="color:var(--text-muted);" class="mb-8 leading-relaxed font-bold text-lg">
+        Somos obcecados pela segurança estrutural do seu telhado, estética perfeita da fachada e máximo rendimento financeiro.
+      </p>
+      
+      <div class="space-y-6 mb-10">
+        <div class="flex items-center gap-4">
+          <div class="w-14 h-14 rounded-full bg-primary/10 flex flex-shrink-0 items-center justify-center text-2xl border border-primary/20">🏛️</div>
+          <div>
+            <p class="font-black text-base">Sede Operacional</p>
+            <p class="text-sm mt-1 font-bold" style="color:var(--text-muted);">R. Cel. Salgueiro, 27 - Centro, Cardoso Moreira - RJ.</p>
+          </div>
+        </div>
+        <div class="flex items-center gap-4">
+          <div class="w-14 h-14 rounded-full bg-primary/10 flex flex-shrink-0 items-center justify-center text-2xl border border-primary/20">📞</div>
+          <div>
+            <p class="font-black text-base">Atendimento Direto</p>
+            <p class="text-sm mt-1 font-bold" style="color:var(--text-muted);" x-text="CONFIG.telefone + ' | ' + CONFIG.email"></p>
+          </div>
+        </div>
+      </div>
+      <button @click="abrirWhatsApp('mapa')" class="btn-primary text-lg px-8 py-5 w-full sm:w-auto">Agendar Reunião Técnica</button>
+    </div>
+
+    <div class="md:w-1/2 w-full reveal">
+      <div class="card p-2 w-full shadow-2xl border-4 border-[var(--bg-card)] rounded-2xl overflow-hidden relative">
+        <iframe src="https://maps.google.com/maps?q=R.%20Cel.%20Salgueiro,%2027,%20Centro,%20Cardoso%20Moreira%20-%20RJ&t=&z=15&ie=UTF8&iwloc=&output=embed" width="100%" height="450" :style="theme === 'dark' ? 'border:0; border-radius: 12px; filter: invert(90%) hue-rotate(180deg);' : 'border:0; border-radius: 12px;'" allowfullscreen="" loading="lazy" class="w-full"></iframe>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════════ TICKER BOTTOM ══════════ -->
+<div style="background:var(--primary);overflow:hidden;padding:12px 0; position:relative; z-index:10;" aria-hidden="true">
+  <div class="ticker-track">
+    <template x-for="_ in [1,2,3]">
+      <div class="flex items-center gap-8 pr-8" style="white-space:nowrap;">
+        <span class="font-bold text-sm text-[#ffffff] px-4 uppercase tracking-wider drop-shadow-sm">⚡ Instalação em 48h</span><span class="text-white/30">•</span>
+        <span class="font-bold text-sm text-[#ffffff] px-4 uppercase tracking-wider drop-shadow-sm">📈 Imóvel Valorizado</span><span class="text-white/30">•</span>
+        <span class="font-bold text-sm text-[#ffffff] px-4 uppercase tracking-wider drop-shadow-sm">🔋 Tecnologia Solltech</span><span class="text-white/30">•</span>
+        <span class="font-bold text-sm text-[#ffffff] px-4 uppercase tracking-wider drop-shadow-sm">💡 95% de Economia</span><span class="text-white/30">•</span>
+        <span class="font-bold text-sm text-[#ffffff] px-4 uppercase tracking-wider drop-shadow-sm">🏦 Até 84x</span><span class="text-white/30">•</span>
+        <span class="font-bold text-sm text-[#ffffff] px-4 uppercase tracking-wider drop-shadow-sm">🔒 25 Anos Garantia</span><span class="text-white/30">•</span>
+      </div>
+    </template>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════ FOOTER ══════════════ -->
+<footer class="py-16 px-4 border-t border-[var(--border-color)] bg-[var(--bg-main)] relative z-10">
+  <div class="max-w-6xl mx-auto">
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-12 mb-12">
+      
+      <!-- Marca e Filosofia -->
+      <div class="md:col-span-1">
+        <div class="logo-frame mb-6 flex gap-3 items-center !px-4 !py-2 inline-flex">
+          <img :src="CONFIG.logoCompletaUrl" class="h-10 md:h-14 object-contain" alt="Solltech" />
+        </div>
+        <p class="text-sm font-bold leading-relaxed italic" style="color:var(--text-muted);">
+          "Nosso compromisso é transformar o poder do sol em liberdade financeira e sustentabilidade para o seu futuro, entregando a máxima excelência em engenharia e gestão de projetos."
+        </p>
+      </div>
+
+      <!-- Links -->
+      <div>
+        <p class="font-black text-base mb-6 uppercase tracking-wider">Links Rápidos</p>
+        <ul class="space-y-4 text-sm font-bold" style="color:var(--text-muted);">
+          <li><a href="#simulador" class="hover:text-primary-color transition-colors">Simulador de Economia</a></li>
+          <li><button @click="abrirWhatsApp('footer')" class="hover:text-primary-color transition-colors text-left">Financiamento Bancário</button></li>
+          <li><button @click="abrirWhatsApp('footer')" class="hover:text-primary-color transition-colors text-left">Falar com um Engenheiro</button></li>
+        </ul>
+      </div>
+
+      <!-- Contato Oficial -->
+      <div>
+        <p class="font-black text-base mb-6 uppercase tracking-wider">Contato Oficial</p>
+        <button @click="abrirWhatsApp('floating')" class="flex items-center gap-3 text-sm mb-4 font-bold hover:text-primary-color transition-colors" style="color:var(--text-muted);">
+          <span style="color:#25d366" class="text-xl">●</span> WhatsApp Direto
+        </button>
+        <p class="flex items-center gap-3 text-sm mb-4 font-bold" style="color:var(--text-muted);">
+          <span style="color:var(--accent)" class="text-xl">●</span> <span x-text="CONFIG.telefone"></span>
+        </p>
+        <p class="flex items-center gap-3 text-sm font-bold" style="color:var(--text-muted);">
+          <span style="color:var(--accent)" class="text-xl">●</span> <span x-text="CONFIG.email"></span>
+        </p>
+        <p class="text-sm mt-6 font-bold" style="color:var(--text-muted);">
+          R. Cel. Salgueiro, 27 - Centro<br>Cardoso Moreira, RJ - 28180-000
+        </p>
+      </div>
+    </div>
+
+    <!-- Copyright & Créditos -->
+    <div class="border-t border-[var(--border-color)] pt-8 flex flex-col sm:flex-row justify-between items-center gap-4 text-sm font-bold" style="color:var(--text-muted);">
+      <p>© <span x-text="new Date().getFullYear()"></span> <span x-text="CONFIG.empresa"></span>. Todos os direitos reservados.</p>
+      <p>Produzido por <strong class="text-[var(--text-main)] font-black">Montana</strong></p>
+    </div>
+  </div>
+</footer>
+
+<!-- ═══════════════════════ BOTÕES FLUTUANTES (WHATSAPP + INSTAGRAM) ══════════ -->
+<div class="floating-container">
+  <a :href="CONFIG.instagram" target="_blank" rel="noopener noreferrer" class="ig-float" aria-label="Instagram">
+    <svg viewBox="0 0 24 24" fill="white" class="w-6 h-6"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zM12 0C8.741 0 8.333.014 7.053.072 2.695.272.273 2.69.073 7.052.014 8.333 0 8.741 0 12c0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98C8.333 23.986 8.741 24 12 24c3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98C15.668.014 15.259 0 12 0zm0 5.838a6.162 6.162 0 100 12.324 6.162 6.162 0 000-12.324zM12 16a4 4 0 110-8 4 4 0 010 8zm6.406-11.845a1.44 1.44 0 100 2.881 1.44 1.44 0 000-2.881z"/></svg>
+  </a>
+  <div class="wa-float" @click="abrirWhatsApp('floating-wa')" role="button" aria-label="WhatsApp">
+    <svg width="32" height="32" viewBox="0 0 24 24" fill="white">
+      <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 0 1-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 0 1-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 0 1 2.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0 0 12.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 0 0 5.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 0 0-3.48-8.413Z"/>
+    </svg>
+  </div>
+</div>
+
+</body>
+</html>
